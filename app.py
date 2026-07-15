@@ -66,6 +66,8 @@ def send_email(to_email: str):
     except smtplib.SMTPAuthenticationError:
         return False, "Gmail login failed. Check GMAIL_USER / GMAIL_APP_PASSWORD."
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return False, str(e)
 
 
@@ -83,8 +85,13 @@ def send():
         return jsonify({"success": False, "message": "Please enter a valid email address."}), 400
 
     success, message = send_email(to_email)
+    print("Success:", success)
+    print("Message:", message)
     status_code = 200 if success else 500
-    return jsonify({"success": success, "message": message, "email": to_email}), status_code
+    return jsonify({
+        "success": success,
+        "message": message
+    }), status_code
 
 
 if __name__ == "__main__":
