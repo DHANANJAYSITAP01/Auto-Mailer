@@ -55,10 +55,13 @@ def send_email(to_email: str):
             msg.attach(part)
 
     try:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
-            server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-            server.sendmail(GMAIL_USER, to_email, msg.as_string())
+        server = smtplib.SMTP("smtp.gmail.com", 587, timeout=30)
+        server.ehlo()
+        server.starttls()
+        server.ehlo()
+        server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+        server.sendmail(GMAIL_USER, to_email, msg.as_string())
+        server.quit()
         return True, "Email sent successfully."
     except smtplib.SMTPAuthenticationError:
         return False, "Gmail login failed. Check GMAIL_USER / GMAIL_APP_PASSWORD."
