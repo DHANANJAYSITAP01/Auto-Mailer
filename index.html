@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Auto Mailer</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+  <div class="card">
+    <h1>🚀 HR Auto Mailer</h1>
+    <p class="subtitle">Data Engineer Job Application Automation</p>
+
+    <label for="email">HR Email Address</label>
+    <input type="email" id="email" placeholder="hr@company.com" autocomplete="off">
+
+    <button id="sendBtn" onclick="sendMail()">📧 Send Resume</button>
+
+    <div id="statusBox" class="status hidden"></div>
+
+    <div class="footer">
+      Developed by <strong>Dhananjay Sitap</strong>
+    </div>
+  </div>
+
+<script>
+async function sendMail() {
+  const emailInput = document.getElementById("email");
+  const btn = document.getElementById("sendBtn");
+  const statusBox = document.getElementById("statusBox");
+  const email = emailInput.value.trim();
+
+  statusBox.classList.remove("hidden", "success", "error");
+
+  if (!email.includes("@") || !email.includes(".")) {
+    statusBox.textContent = "❌ Please enter a valid email address.";
+    statusBox.classList.add("error");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Sending...";
+  statusBox.textContent = "⏳ Sending email...";
+  statusBox.classList.remove("error", "success");
+
+  try {
+    const response = await fetch("/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      statusBox.textContent = "✅ Sent to " + result.email;
+      statusBox.classList.add("success");
+      emailInput.value = "";
+    } else {
+      statusBox.textContent = "❌ " + result.message;
+      statusBox.classList.add("error");
+    }
+  } catch (err) {
+    statusBox.textContent = "❌ Network error. Try again.";
+    statusBox.classList.add("error");
+  }
+
+  btn.disabled = false;
+  btn.textContent = "📧 Send Resume";
+}
+
+document.getElementById("email").addEventListener("keypress", function(e) {
+  if (e.key === "Enter") sendMail();
+});
+</script>
+
+</body>
+</html>
